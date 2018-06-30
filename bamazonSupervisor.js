@@ -10,6 +10,8 @@ var sales=0;
 var id=0;
 var localdata=[];
 var indexer=0;
+var localdeptdata=[];
+
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -45,7 +47,7 @@ var runobject={
             }
             //console.log(optionlist);
             //table.draw(res);
-            runobject.interface();
+            runobject.salesby();
         })   
     },
 
@@ -103,6 +105,36 @@ var runobject={
                     runobject.display();
                 })   
             });
+    },
+    
+    salesby: function(){
+        var sql="select sales from"
+        connection.query("select * from departments;",
+        function(err, res) {
+            if(err){console.log(err)}
+            //console.log(res);
+            localdeptdata=[];
+            let table = new Tablefy();
+            for(var i=0; i<res.length; i++){
+                localdeptdata.push(res[i]);
+            }
+            for(var r=0; r<localdeptdata.length; r++){
+            localdeptdata[r].total=0;
+            localdeptdata[r].net=0;
+            }
+            for(var i=0; i<localdata.length; i++){
+                for(var r=0; r<localdeptdata.length; r++){
+                    if(localdeptdata[r].department_name===localdata[i].department_name){
+                        localdeptdata[r].total=parseFloat(localdeptdata[r].total)+parseFloat(localdata[i].product_sales);
+                    }
+                }
+            }
+            for(var r=0; r<localdeptdata.length; r++){
+                localdeptdata[r].net=parseFloat(localdeptdata[r].total)-parseFloat(localdeptdata[r].over_head_costs);
+            }
+            table.draw(localdeptdata);
+            runobject.interface();
+        })   
     }
 
 }
